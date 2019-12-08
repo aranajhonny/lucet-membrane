@@ -293,14 +293,31 @@ impl MmapRegion {
     }
 
     fn create_slot(region: &Arc<MmapRegion>) -> Result<Slot, Error> {
+        // deps to mmap to file
+        use std::fs::OpenOptions;
+        use std::os::unix::io::AsRawFd;
+        use nix::unistd::{ftruncate};
+        use libc::off_t;
+
+        // if file dont exists  - .create(true)
+        // use apropiate filename to program
+        let file = OpenOptions::new()
+            .read(true)
+            .create(true)
+            .write(true)
+            .open("/tmp/lucet_mmap").unwrap();
+
+        // file size to region.limits.total_memory_size(), used in mmap
+
+        ftruncate(file.as_raw_fd(), region.limits.total_memory_size() as off_t).unwrap();
         // get the chunk of virtual memory that the `Slot` will manage
         let mem = unsafe {
             mmap(
                 ptr::null_mut(),
                 region.limits.total_memory_size(),
                 ProtFlags::PROT_NONE,
-                MapFlags::MAP_ANON | MapFlags::MAP_PRIVATE,
-                0,
+                MapFlags::MAP_SHARED,
+                file.as_raw_fd(),
                 0,
             )?
         };

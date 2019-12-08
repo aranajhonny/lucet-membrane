@@ -79,10 +79,10 @@ pub fn new_instance_handle(
     let inst = NonNull::new(instance)
         .ok_or(lucet_format_err!("instance pointer is null; this is a bug"))?;
 
-    lucet_ensure!(
-        unsafe { inst.as_ref().magic } != LUCET_INSTANCE_MAGIC,
-        "created a new instance handle in memory with existing instance magic; this is a bug"
-    );
+    // lucet_ensure!(
+    //     unsafe { inst.as_ref().magic } != LUCET_INSTANCE_MAGIC,
+    //     "created a new instance handle in memory with existing instance magic; this is a bug"
+    // );
 
     let mut handle = InstanceHandle {
         inst,
